@@ -21,7 +21,7 @@ __pycache__/
 
 # Dados muito grandes (caso queira não versionar)
 data/raw/*.parquet
-#data/raw/*.csv
+data/raw/*.csv
 
 # Docker volumes (não versionar sstables)
 docker/data/
