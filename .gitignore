@@ -1,0 +1,31 @@
+# Ambiente virtual
+.venv/
+venv/
+ENV/
+env/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Logs
+*.log
+
+# Jupyter cache
+.ipynb_checkpoints/
+
+# VS Code
+.vscode/
+
+# Dados muito grandes (caso queira não versionar)
+data/raw/*.parquet
+data/raw/*.csv
+
+# Docker volumes (não versionar sstables)
+docker/data/
+
+# Sistema
+.DS_Store
+Thumbs.db

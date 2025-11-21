@@ -1,0 +1,48 @@
+version: "3.8"
+
+services:
+  cassandra-node1:
+    image: cassandra:4.1
+    container_name: cassandra-node1
+    environment:
+      CASSANDRA_CLUSTER_NAME: "MarketplaceCluster"
+      CASSANDRA_NUM_TOKENS: 16
+      CASSANDRA_SEEDS: "cassandra-node1"
+      CASSANDRA_LISTEN_ADDRESS: "cassandra-node1"
+      CASSANDRA_BROADCAST_ADDRESS: "cassandra-node1"
+      CASSANDRA_RPC_ADDRESS: "0.0.0.0"
+      CASSANDRA_ENDPOINT_SNITCH: GossipingPropertyFileSnitch
+    ports:
+      - "9042:9042"
+    volumes:
+      - ./data/node1:/var/lib/cassandra
+    networks:
+      - cassandra-net
+    healthcheck:
+      test: ["CMD-SHELL", "nodetool status"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+
+  cassandra-node2:
+    image: cassandra:4.1
+    container_name: cassandra-node2
+    depends_on:
+      cassandra-node1:
+        condition: service_healthy
+    environment:
+      CASSANDRA_CLUSTER_NAME: "MarketplaceCluster"
+      CASSANDRA_NUM_TOKENS: 16
+      CASSANDRA_SEEDS: "cassandra-node1"
+      CASSANDRA_LISTEN_ADDRESS: "cassandra-node2"
+      CASSANDRA_BROADCAST_ADDRESS: "cassandra-node2"
+      CASSANDRA_RPC_ADDRESS: "0.0.0.0"
+      CASSANDRA_ENDPOINT_SNITCH: GossipingPropertyFileSnitch
+    volumes:
+      - ./data/node2:/var/lib/cassandra
+    networks:
+      - cassandra-net
+
+networks:
+  cassandra-net:
+    driver: bridge

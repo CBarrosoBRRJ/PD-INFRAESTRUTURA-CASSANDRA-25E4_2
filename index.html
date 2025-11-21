@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Infraestrutura de Dados com Apache Cassandra - Projeto de Disciplina</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        :root {
+            --primary: #0b5ed7;
+            --primary-soft: #e7f1ff;
+            --accent: #198754;
+            --text-main: #222222;
+            --text-muted: #666666;
+            --border-soft: #dddddd;
+            --code-bg: #f5f5f5;
+            --tag-bg: #eef2ff;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #ffffff;
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        .page {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 32px 20px 60px 20px;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            border-bottom: 2px solid var(--border-soft);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        header img.logo {
+            height: 70px;
+            width: auto;
+        }
+
+        header .title-block {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        header .course {
+            font-size: 14px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        header h1 {
+            font-size: 24px;
+            margin: 0;
+        }
+
+        header .subtitle {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .meta-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 30px;
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+
+        .badge-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .badge {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 4px 8px;
+            border-radius: 999px;
+            border: 1px solid #cbd5ff;
+            background: var(--tag-bg);
+            color: #1d2b6f;
+        }
+
+        h2 {
+            font-size: 20px;
+            margin-top: 32px;
+            margin-bottom: 8px;
+            border-bottom: 1px solid var(--border-soft);
+            padding-bottom: 4px;
+        }
+
+        h3 {
+            font-size: 16px;
+            margin-top: 20px;
+            margin-bottom: 6px;
+        }
+
+        h4 {
+            font-size: 14px;
+            margin-top: 16px;
+            margin-bottom: 4px;
+        }
+
+        p {
+            margin: 6px 0 10px 0;
+            text-align: justify;
+        }
+
+        ul, ol {
+            margin: 6px 0 12px 20px;
+        }
+
+        .tagline {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+
+        .card {
+            border: 1px solid var(--border-soft);
+            border-radius: 8px;
+            padding: 14px 16px;
+            margin: 16px 0;
+            background-color: #fafafa;
+        }
+
+        .card-title {
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .code-block {
+            margin: 10px 0 14px 0;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+            background-color: var(--code-bg);
+            padding: 10px 12px;
+            font-size: 12px;
+            overflow-x: auto;
+        }
+
+        pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: "SF Mono", Menlo, Monaco, Consolas, "Courier New", monospace;
+        }
+
+        code {
+            font-family: "SF Mono", Menlo, Monaco, Consolas, "Courier New", monospace;
+        }
+
+        .note {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0 16px 0;
+            font-size: 13px;
+        }
+
+        .table th,
+        .table td {
+            border: 1px solid #e0e0e0;
+            padding: 6px 8px;
+            vertical-align: top;
+        }
+
+        .table th {
+            background-color: #f3f3f3;
+            font-weight: 600;
+        }
+
+        .figure {
+            margin: 14px 0;
+            text-align: center;
+        }
+
+        .figure img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid var(--border-soft);
+            border-radius: 4px;
+        }
+
+        .figure-caption {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            text-align: center;
+        }
+
+        .inline-kpi {
+            display: inline-block;
+            padding: 3px 6px;
+            border-radius: 4px;
+            background: var(--primary-soft);
+            color: #1d2b6f;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-right: 6px;
+        }
+
+        .highlight-box {
+            border-left: 3px solid var(--primary);
+            padding-left: 10px;
+            margin: 10px 0 14px 0;
+            font-size: 13px;
+            background: #f8f9ff;
+        }
+
+        a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        @media print {
+            body {
+                background: #ffffff;
+            }
+
+            .page {
+                padding: 0;
+            }
+
+            header {
+                border-bottom: 1px solid #aaaaaa;
+            }
+
+            .card {
+                background: #ffffff;
+            }
+
+            .code-block {
+                background: #f8f8f8;
+            }
+
+            a {
+                color: #000000;
+                text-decoration: underline;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+
+    <!-- CAPA / CABEÇALHO -->
+    <header>
+        <img src="assets/img/Infnet-Logo.png" alt="Logo InfNet" class="logo">
+        <div class="title-block">
+            <div class="course">Banco de Dados Não Relacionais — Apache Cassandra</div>
+            <h1>Infraestrutura de Dados com Apache Cassandra</h1>
+            <div class="subtitle">
+                Projeto de Disciplina — Arquitetura de dados para marketplace de varejo com foco em análise em larga escala.
+            </div>
+        </div>
+    </header>
+
+    <div class="meta-info">
+        <div><strong>Aluno:</strong> Caio Barroso</div>
+        <div><strong>Disciplina:</strong> Banco de Dados Não Relacionais — Apache Cassandra</div>
+        <div><strong>Ferramentas:</strong> Cassandra · Docker · Python · Pandas</div>
+    </div>
+
+    <div class="badge-row">
+        <span class="badge">Cassandra</span>
+        <span class="badge">NoSQL</span>
+        <span class="badge">ETL</span>
+        <span class="badge">Docker</span>
+        <span class="badge">Python</span>
+        <span class="badge">Data Analytics</span>
+    </div>
+
+    <p class="tagline">
+        Este documento descreve, de forma integrada, os aspectos conceituais (SQL vs NoSQL e Cassandra),
+        o planejamento de infraestrutura, a configuração do ambiente, o processo de carga de dados,
+        a preparação analítica em Python e as visualizações geradas para responder a perguntas de negócio
+        de um marketplace de varejo.
+    </p>
+
+    <!-- 1. SQL vs NoSQL -->
+    <h2>1. Bancos de Dados SQL vs NoSQL</h2>
+
+    <p>
+        A disciplina parte da comparação entre modelos relacionais (SQL) e modelos não relacionais (NoSQL),
+        pois a escolha de Cassandra só faz sentido quando se entende o tipo de problema que ele resolve.
+    </p>
+
+    <h3>1.1. SQL (Relacional)</h3>
+    <p>
+        Bancos de dados relacionais (como PostgreSQL, MySQL, SQL Server) utilizam um esquema rígido, tabelas
+        normalizadas e linguagem SQL padronizada. São ideais para:
+    </p>
+    <ul>
+        <li>Transações ACID fortes (sistemas financeiros, ERPs, CRMs).</li>
+        <li>Relacionamentos complexos entre entidades (JOINs frequentes).</li>
+        <li>Registros com estrutura estável e bem definida.</li>
+    </ul>
+
+    <div class="card">
+        <div class="card-title">Exemplo típico de uso (SQL)</div>
+        <p>Sistema bancário com contas, clientes, transferências e saldos, exigindo consistência forte e integridade referencial.</p>
+    </div>
+
+    <h3>1.2. NoSQL</h3>
+    <p>
+        Bancos NoSQL foram projetados para cenários de alta escala, volumes massivos de dados, distribuição
+        geográfica e esquemas mais flexíveis. Existem vários subtipos:
+    </p>
+    <ul>
+        <li><strong>Chave-valor:</strong> Redis, DynamoDB.</li>
+        <li><strong>Documento:</strong> MongoDB, CouchDB.</li>
+        <li><strong>Colunar distribuído:</strong> Apache Cassandra, HBase.</li>
+        <li><strong>Grafos:</strong> Neo4j, JanusGraph.</li>
+    </ul>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Aspecto</th>
+            <th>SQL</th>
+            <th>NoSQL</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>Esquema</td>
+            <td>Rígido, definido antes da carga</td>
+            <td>Mais flexível, orientado a uso</td>
+        </tr>
+        <tr>
+            <td>Escalabilidade</td>
+            <td>Vertical (scale-up)</td>
+            <td>Horizontal (scale-out)</td>
+        </tr>
+        <tr>
+            <td>Consistência</td>
+            <td>ACID forte</td>
+            <td>Configurável (eventual, tunável)</td>
+        </tr>
+        <tr>
+            <td>Consultas</td>
+            <td>JOINs, ad-hoc SQL</td>
+            <td>Consultas otimizadas por chave e partição</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="card">
+        <div class="card-title">Exemplo típico de uso (NoSQL / Cassandra)</div>
+        <p>
+            Plataforma de marketplace com milhões de pedidos por dia, replicados em vários datacenters,
+            onde a prioridade é alta disponibilidade e baixa latência para leitura de relatórios agregados
+            de vendas, mesmo em caso de falha de nós isolados.
+        </p>
+    </div>
+
+    <!-- 2. Introdução ao Apache Cassandra -->
+    <h2>2. Introdução ao Apache Cassandra</h2>
+
+    <p>
+        Apache Cassandra é um banco de dados NoSQL distribuído, orientado a colunas, projetado para
+        alta disponibilidade, escalabilidade horizontal e tolerância a falhas. Ele é amplamente utilizado
+        em sistemas que exigem gravações intensas e leitura em baixa latência, em múltiplas regiões.
+    </p>
+
+    <h3>2.1. Principais características</h3>
+    <ul>
+        <li><strong>Arquitetura peer-to-peer:</strong> não há um nó mestre; todos os nós são equivalentes.</li>
+        <li><strong>Replicação configurável:</strong> fator de replicação por keyspace, suportando falhas de nós/datacenters.</li>
+        <li><strong>Escalabilidade linear:</strong> ao adicionar nós, aumenta-se a capacidade de leitura/escrita.</li>
+        <li><strong>Modelo de dados baseado em colunas amplas:</strong> tabelas otimizadas para queries específicas.</li>
+        <li><strong>Consistência tunável:</strong> leitura/escrita com níveis de consistência configuráveis (ONE, QUORUM, ALL, etc.).</li>
+    </ul>
+
+    <h3>2.2. Funcionamento em alto nível</h3>
+    <p>
+        Os dados em Cassandra são distribuídos no cluster por meio de <em>partition keys</em>, que determinam
+        em quais nós as linhas serão fisicamente armazenadas. Cada tabela deve ser modelada
+        a partir das consultas que serão executadas — ou seja, modelagem <strong>query-driven</strong>, e não
+        normalizada como em bancos relacionais.
+    </p>
+
+    <div class="highlight-box">
+        <strong>Resumo:</strong> Cassandra é adequado quando precisamos de grandes volumes de dados, replicação,
+        disponibilidade alta e consultas bem definidas por chave ou partição (por exemplo, vendas por estado, categoria e período).
+    </div>
+
+    <!-- 3. Contexto de Negócio e Dataset -->
+    <h2>3. Contexto de Negócio e Conjunto de Dados</h2>
+
+    <p>
+        O projeto representa um marketplace de varejo com grande volume de transações, múltiplos estados e
+        categorias de produto. O objetivo é suportar análises de:
+    </p>
+    <ul>
+        <li>Vendas por período (mês/ano).</li>
+        <li>Receita por estado e categoria.</li>
+        <li>Relação entre preço e rating dos produtos.</li>
+    </ul>
+
+    <p>
+        O conjunto de dados utilizado é um dataset sintético (simulado) que representa o comportamento
+        de transações em um marketplace, com arquivos em <code>.csv</code> e <code>.parquet</code> armazenados em
+        <code>data/raw/</code>.
+    </p>
+
+    <div class="card">
+        <div class="card-title">Estrutura de diretórios relevante</div>
+        <pre class="code-block"><code>assets/
+  img/
+    Infnet-Logo.png
+  evidencias/
+    dataset_sintetico.png
+    etl_analysis.png
+
+data/
+  raw/
+    marketplace_sample_30.csv
+    marketplace_bigdata_1M.parquet
+  processed/
+    vendas_por_mes.csv
+    receita_estado_categoria.csv
+    preco_rating_por_produto.csv
+
+docker/
+  docker-compose.yml
+  marketplace_schema.cql
+
+src/
+  dataset_sintetico.py
+  etl_analysis.py
+  etl_cassandra.py
+  plots_marketplace.py
+
+img/
+  grafico_linha_vendas_tempo.png
+  grafico_barras_categoria_estado.png
+  grafico_dispersao_preco_rating.png</code></pre>
+        <p class="note">
+            Evidências de execução estão em <code>assets/evidencias/</code> e gráficos finais para o relatório em <code>img/</code>.
+        </p>
+    </div>
+
+    <!-- 4. Perguntas de Negócio -->
+    <h2>4. Perguntas de Negócio</h2>
+
+    <p>
+        As principais perguntas de negócio que orientam a modelagem e o processo analítico são:
+    </p>
+
+    <ol>
+        <li>
+            <strong>Receita e volume:</strong> Como se comportam as vendas mensais (volume e receita) ao longo do tempo?
+        </li>
+        <li>
+            <strong>Mix por estado/categoria:</strong> Quais estados e categorias geram maior receita, e qual o ticket médio por combinação estado–categoria?
+        </li>
+        <li>
+            <strong>Preço x qualidade:</strong> Existe relação entre preço dos produtos e rating médio (avaliações) recebidos?
+        </li>
+    </ol>
+
+    <p>
+        A modelagem em Cassandra, o ETL em Python e as visualizações finais foram desenhados para responder a essas perguntas.
+    </p>
+
+    <!-- 5. Arquitetura e Planejamento de Infraestrutura -->
+    <h2>5. Arquitetura e Planejamento de Infraestrutura</h2>
+
+    <p>
+        A infraestrutura planejada para hospedar os dados e suportar o processamento analítico foi baseada em:
+    </p>
+
+    <ul>
+        <li>Cluster Cassandra com 2 nós (para alta disponibilidade e simulação de ambiente distribuído).</li>
+        <li>Orquestração via Docker Compose.</li>
+        <li>Volumes persistentes mapeados para dados e commit logs de cada nó.</li>
+        <li>Container adicional para execução dos scripts Python (opcional, aqui rodado localmente na máquina host).</li>
+    </ul>
+
+    <div class="card">
+        <div class="card-title">Planejamento básico (recursos)</div>
+        <ul>
+            <li><strong>Máquina host:</strong> Windows com WSL/Docker Desktop.</li>
+            <li><strong>Recursos mínimos:</strong> 4 vCPUs, 8 GB RAM para ambiente de desenvolvimento.</li>
+            <li><strong>Storage:</strong> Volumes Docker para <code>/var/lib/cassandra</code> de cada nó (~10 GB).</li>
+            <li><strong>Rede:</strong> Rede bridge com portas expostas 9042 (CQL) para conexão dos clientes.</li>
+        </ul>
+    </div>
+
+    <!-- 6. Configuração do Ambiente Cassandra -->
+    <h2>6. Configuração do Ambiente Computacional</h2>
+
+    <p>
+        A preparação do ambiente seguiu os passos abaixo, executados na máquina host:
+    </p>
+
+    <h3>6.1. Instalação de dependências</h3>
+
+    <div class="code-block">
+        <pre><code># Instalar Docker Desktop no Windows (via instalador oficial)
+# Após instalação, garantir que o serviço Docker esteja em execução.
+
+# Verificar versão do Docker no PowerShell
+docker --version</code></pre>
+    </div>
+
+    <p>
+        Uma vez com Docker funcional, o cluster Cassandra é descrito em <code>docker/docker-compose.yml</code>.
+    </p>
+
+    <h3>6.2. Arquivo docker-compose.yml (trecho principal)</h3>
+
+    <div class="code-block">
+        <pre><code># Arquivo: docker/docker-compose.yml
+
+version: '3.8'
+
+services:
+  cassandra-node1:
+    image: cassandra:latest
+    container_name: cassandra-node1
+    environment:
+      - CASSANDRA_CLUSTER_NAME=marketplace-cluster
+      - CASSANDRA_SEEDS=cassandra-node1
+      - CASSANDRA_START_RPC=true
+    ports:
+      - "9042:9042"
+    volumes:
+      - ./data/node1:/var/lib/cassandra
+    networks:
+      - cassandra-net
+
+  cassandra-node2:
+    image: cassandra:latest
+    container_name: cassandra-node2
+    environment:
+      - CASSANDRA_CLUSTER_NAME=marketplace-cluster
+      - CASSANDRA_SEEDS=cassandra-node1
+    volumes:
+      - ./data/node2:/var/lib/cassandra
+    networks:
+      - cassandra-net
+    depends_on:
+      - cassandra-node1
+
+networks:
+  cassandra-net:
+    driver: bridge</code></pre>
+    </div>
+
+    <p class="note">
+        O arquivo completo está disponível em <code>docker/docker-compose.yml</code> no repositório do projeto.
+    </p>
+
+    <h3>6.3. Subida do cluster</h3>
+
+    <div class="code-block">
+        <pre><code># No PowerShell, a partir da raiz do projeto
+cd "E:\desenvolvimento\Infraestrutura Cassandra [25E4_2]\docker"
+
+# Subir os containers em segundo plano
+docker-compose up -d
+
+# Verificar se os containers estão rodando
+docker ps</code></pre>
+    </div>
+
+    <!-- 7. Modelagem de Dados no Cassandra -->
+    <h2>7. Modelagem de Dados no Cassandra</h2>
+
+    <p>
+        A modelagem foi conduzida de forma orientada às consultas, conforme boas práticas de Cassandra.
+        As principais tabelas residem no keyspace <code>marketplace_ks</code>.
+    </p>
+
+    <h3>7.1. Criação do keyspace</h3>
+
+    <div class="code-block">
+        <pre><code>-- Arquivo: docker/marketplace_schema.cql (trecho)
+
+CREATE KEYSPACE IF NOT EXISTS marketplace_ks
+WITH replication = {
+  'class': 'SimpleStrategy',
+  'replication_factor': 2
+};</code></pre>
+    </div>
+
+    <h3>7.2. Tabela principal de transações</h3>
+
+    <div class="code-block">
+        <pre><code>CREATE TABLE IF NOT EXISTS marketplace_ks.sales_transactions (
+    order_id       uuid,
+    order_date     date,
+    state          text,
+    category       text,
+    product_id     text,
+    product_name   text,
+    quantity       int,
+    unit_price     decimal,
+    total_price    decimal,
+    rating         decimal,
+    PRIMARY KEY ((state, category), order_date, order_id)
+) WITH CLUSTERING ORDER BY (order_date DESC, order_id ASC);</code></pre>
+    </div>
+
+    <p>
+        A partição composta <code>(state, category)</code> permite agrupar fisicamente os dados por estado e categoria,
+        o que otimiza relatórios por combinação estado–categoria e período (pergunta de negócio 2).
+    </p>
+
+    <h3>7.3. Tabela de agregados mensais</h3>
+
+    <div class="code-block">
+        <pre><code>CREATE TABLE IF NOT EXISTS marketplace_ks.sales_by_month (
+    year_month     text,     -- ex: "2024-01"
+    state          text,
+    category       text,
+    total_orders   bigint,
+    total_quantity bigint,
+    total_revenue  decimal,
+    avg_ticket     decimal,
+    PRIMARY KEY ((year_month), state, category)
+) WITH CLUSTERING ORDER BY (state ASC, category ASC);</code></pre>
+    </div>
+
+    <p>
+        Esta tabela suporta consultas rápidas de vendas mensais (pergunta 1) e ticket médio por estado/categoria.
+    </p>
+
+    <!-- 8. Carga de Dados (ETL) e Comprovação -->
+    <h2>8. Carga de Dados no Cassandra (ETL) e Comprovação</h2>
+
+    <p>
+        A carga foi realizada via script Python <code>src/etl_cassandra.py</code>, que lê os arquivos de entrada,
+        prepara os dados e insere nas tabelas do keyspace <code>marketplace_ks</code>.
+    </p>
+
+    <h3>8.1. Exemplo de script de carga em Python</h3>
+
+    <div class="code-block">
+        <pre><code># Arquivo: src/etl_cassandra.py (trecho)
+
+from cassandra.cluster import Cluster
+import pandas as pd
+
+# Conexão com o cluster Cassandra
+cluster = Cluster(['localhost'])  # cassandra-node1 exposto na porta 9042
+session = cluster.connect('marketplace_ks')
+
+# Leitura do dataset bruto
+df = pd.read_parquet('data/raw/marketplace_bigdata_1M.parquet')
+
+# Cálculo do total_price
+df['total_price'] = df['quantity'] * df['unit_price']
+
+# Inserção na tabela sales_transactions
+insert_stmt = session.prepare("""
+    INSERT INTO sales_transactions (
+        state, category, order_date, order_id,
+        product_id, product_name, quantity,
+        unit_price, total_price, rating
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+""")
+
+for _, row in df.iterrows():
+    session.execute(
+        insert_stmt,
+        (
+            row['state'],
+            row['category'],
+            row['order_date'].date(),
+            row['order_id'],
+            row['product_id'],
+            row['product_name'],
+            int(row['quantity']),
+            float(row['unit_price']),
+            float(row['total_price']),
+            float(row['rating']),
+        )
+    )
+
+cluster.shutdown()</code></pre>
+    </div>
+
+    <h3>8.2. Comprovação de carga bem sucedida</h3>
+
+    <p>
+        Após a execução do ETL, uma consulta de contagem foi executada via <code>cqlsh</code>:
+    </p>
+
+    <div class="code-block">
+        <pre><code>-- Exemplo de validação no cqlsh
+
+USE marketplace_ks;
+
+SELECT COUNT(*) FROM sales_transactions;</code></pre>
+    </div>
+
+    <p class="note">
+        Prints da execução do ETL e da estrutura dos dados estão salvos em
+        <code>assets/evidencias/dataset_sintetico.png</code> e <code>assets/evidencias/etl_analysis.png</code>.
+    </p>
+
+    <!-- 9. Extração, Manipulação e Exportação em Python -->
+    <h2>9. Extração, Manipulação e Exportação da Base Tratada</h2>
+
+    <p>
+        Para apoiar a resposta das perguntas de negócio, foi desenvolvido o script
+        <code>src/etl_analysis.py</code>, responsável por:
+    </p>
+    <ul>
+        <li>Ler os dados brutos.</li>
+        <li>Executar operações de limpeza e manipulação.</li>
+        <li>Criar variáveis derivadas (como <code>total_price</code> e <code>year_month</code>).</li>
+        <li>Gerar bases agregadas e exportá-las em CSV.</li>
+    </ul>
+
+    <h3>9.1. Extração e criação de variáveis</h3>
+
+    <div class="code-block">
+        <pre><code># Arquivo: src/etl_analysis.py (trecho)
+
+import pandas as pd
+
+# Leitura dos dados brutos
+df_raw = pd.read_parquet('data/raw/marketplace_bigdata_1M.parquet')
+
+# Conversão de datas
+df_raw['order_date'] = pd.to_datetime(df_raw['order_date'])
+
+# Criação de nova variável: total_price
+df_raw['total_price'] = df_raw['quantity'] * df_raw['unit_price']
+
+# Criação de variável year_month (AAAA-MM)
+df_raw['year_month'] = df_raw['order_date'].dt.to_period('M').astype(str)</code></pre>
+    </div>
+
+    <h3>9.2. Operações de manipulação de dados</h3>
+
+    <div class="code-block">
+        <pre><code># Agregado de vendas por mês
+vendas_por_mes = (
+    df_raw
+    .groupby('year_month')
+    .agg(
+        total_orders=('order_id', 'nunique'),
+        total_quantity=('quantity', 'sum'),
+        total_revenue=('total_price', 'sum')
+    )
+    .reset_index()
+)
+
+# Agregado de receita por estado e categoria
+receita_estado_categoria = (
+    df_raw
+    .groupby(['state', 'category'])
+    .agg(
+        total_revenue=('total_price', 'sum'),
+        total_orders=('order_id', 'nunique'),
+        avg_ticket=('total_price', 'mean')
+    )
+    .reset_index()
+)
+
+# Base para gráfico de dispersão (preço x rating por produto)
+preco_rating_por_produto = (
+    df_raw
+    .groupby(['product_id', 'product_name'])
+    .agg(
+        avg_price=('unit_price', 'mean'),
+        avg_rating=('rating', 'mean'),
+        total_orders=('order_id', 'nunique')
+    )
+    .reset_index()
+)</code></pre>
+    </div>
+
+    <h3>9.3. Exportação da base tratada para CSV</h3>
+
+    <div class="code-block">
+        <pre><code># Exporta as bases tratadas para data/processed/
+
+vendas_por_mes.to_csv('data/processed/vendas_por_mes.csv', index=False)
+receita_estado_categoria.to_csv('data/processed/receita_estado_categoria.csv', index=False)
+preco_rating_por_produto.to_csv('data/processed/preco_rating_por_produto.csv', index=False)</code></pre>
+    </div>
+
+    <p>
+        Essas exportações atendem ao requisito de geração de base tratada em CSV para posterior análise
+        e consumo por outras ferramentas.
+    </p>
+
+    <!-- 10. Consultas de Leitura na Infraestrutura Cassandra -->
+    <h2>10. Consultas de Leitura na Infraestrutura Cassandra</h2>
+
+    <p>
+        Com a base carregada, foram executadas consultas de leitura diretamente em Cassandra,
+        tanto via <code>cqlsh</code> quanto via driver Python.
+    </p>
+
+    <h3>10.1. Exemplo de consulta de leitura em CQL</h3>
+
+    <div class="code-block">
+        <pre><code>-- Vendas por estado e categoria em um mês específico
+
+SELECT state, category, total_orders, total_revenue, avg_ticket
+FROM marketplace_ks.sales_by_month
+WHERE year_month = '2024-01';</code></pre>
+    </div>
+
+    <h3>10.2. Exemplo de consulta de leitura em Python</h3>
+
+    <div class="code-block">
+        <pre><code># Leitura de agregados mensais diretamente do Cassandra
+
+from cassandra.cluster import Cluster
+
+cluster = Cluster(['localhost'])
+session = cluster.connect('marketplace_ks')
+
+rows = session.execute("""
+    SELECT year_month, state, category, total_orders, total_revenue, avg_ticket
+    FROM sales_by_month
+    WHERE year_month = '2024-01'
+""")
+
+for row in rows:
+    print(row.year_month, row.state, row.category, row.total_orders, row.total_revenue)
+
+cluster.shutdown()</code></pre>
+    </div>
+
+    <!-- 11. Visualizações de Dados -->
+    <h2>11. Visualizações e Respostas às Perguntas de Negócio</h2>
+
+    <p>
+        As visualizações foram geradas em Python (script <code>src/plots_marketplace.py</code>) a partir dos arquivos
+        tratados em <code>data/processed/</code>, com as figuras salvas na pasta <code>img/</code>.
+    </p>
+
+    <h3>11.1. Gráfico de linhas — Vendas mensais (pergunta 1)</h3>
+
+    <div class="code-block">
+        <pre><code># Arquivo: src/plots_marketplace.py (trecho)
+
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Vendas por mês
+vendas_por_mes = pd.read_csv('data/processed/vendas_por_mes.csv')
+
+plt.figure(figsize=(10, 5))
+plt.plot(vendas_por_mes['year_month'], vendas_por_mes['total_revenue'], marker='o')
+plt.xticks(rotation=45)
+plt.xlabel('Ano-Mês')
+plt.ylabel('Receita total')
+plt.title('Receita mensal do marketplace')
+plt.tight_layout()
+plt.savefig('img/grafico_linha_vendas_tempo.png')
+plt.close()</code></pre>
+    </div>
+
+    <div class="figure">
+        <img src="img/grafico_linha_vendas_tempo.png" alt="Gráfico de linha - vendas mensais">
+        <div class="figure-caption">
+            Figura 1 — Evolução da receita mensal do marketplace
+            (arquivo: <code>img/grafico_linha_vendas_tempo.png</code>).
+        </div>
+    </div>
+
+    <p>
+        Este gráfico permite observar sazonalidade, crescimento ou queda na receita ao longo dos meses,
+        respondendo diretamente à pergunta de negócio sobre a evolução das vendas ao longo do tempo.
+    </p>
+
+    <h3>11.2. Gráfico de barras — Receita por estado e categoria (pergunta 2)</h3>
+
+    <div class="code-block">
+        <pre><code># Gráfico de barras por estado e categoria
+
+receita_estado_categoria = pd.read_csv('data/processed/receita_estado_categoria.csv')
+
+# Exemplo: filtrar top N categorias por estado
+top = (
+    receita_estado_categoria
+    .sort_values('total_revenue', ascending=False)
+    .head(20)
+)
+
+plt.figure(figsize=(10, 6))
+plt.barh(
+    top['state'] + ' - ' + top['category'],
+    top['total_revenue']
+)
+plt.xlabel('Receita total')
+plt.ylabel('Estado - Categoria')
+plt.title('Receita por estado e categoria')
+plt.tight_layout()
+plt.savefig('img/grafico_barras_categoria_estado.png')
+plt.close()</code></pre>
+    </div>
+
+    <div class="figure">
+        <img src="img/grafico_barras_categoria_estado.png" alt="Gráfico de barras - receita por estado e categoria">
+        <div class="figure-caption">
+            Figura 2 — Receita por estado e categoria
+            (arquivo: <code>img/grafico_barras_categoria_estado.png</code>).
+        </div>
+    </div>
+
+    <p>
+        A visualização deixa evidente quais combinações estado–categoria concentram a maior parte da receita,
+        além de permitir comparar o ticket médio (via tabela <code>sales_by_month</code> e agregados em Python).
+    </p>
+
+    <h3>11.3. Gráfico de dispersão — Preço vs rating (pergunta 3)</h3>
+
+    <div class="code-block">
+        <pre><code># Gráfico de dispersão preço x rating por produto
+
+preco_rating = pd.read_csv('data/processed/preco_rating_por_produto.csv')
+
+plt.figure(figsize=(8, 6))
+plt.scatter(
+    preco_rating['avg_price'],
+    preco_rating['avg_rating'],
+    alpha=0.6
+)
+plt.xlabel('Preço médio do produto')
+plt.ylabel('Rating médio')
+plt.title('Dispersão preço x rating dos produtos')
+plt.tight_layout()
+plt.savefig('img/grafico_dispersao_preco_rating.png')
+plt.close()</code></pre>
+    </div>
+
+    <div class="figure">
+        <img src="img/grafico_dispersao_preco_rating.png" alt="Gráfico de dispersão - preço vs rating">
+        <div class="figure-caption">
+            Figura 3 — Dispersão entre preço médio e rating dos produtos
+            (arquivo: <code>img/grafico_dispersao_preco_rating.png</code>).
+        </div>
+    </div>
+
+    <p>
+        O gráfico permite identificar se produtos mais caros tendem a receber avaliações melhores ou piores,
+        além de destacar outliers (produtos caros com rating baixo ou baratos com rating muito alto).
+    </p>
+
+    <!-- 12. Evidências de Execução -->
+    <h2>12. Evidências de Execução</h2>
+
+    <p>
+        As evidências visuais da execução dos scripts e da preparação dos dados foram salvas na pasta
+        <code>assets/evidencias/</code>:
+    </p>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Arquivo</th>
+            <th>Descrição</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td><code>assets/evidencias/dataset_sintetico.png</code></td>
+            <td>Print da execução do script <code>dataset_sintetico.py</code> e visualização da estrutura básica do dataset.</td>
+        </tr>
+        <tr>
+            <td><code>assets/evidencias/etl_analysis.png</code></td>
+            <td>Print da execução do script <code>etl_analysis.py</code>, incluindo geração de agregados e exportação para CSV.</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- 13. Conclusões e Próximos Passos -->
+    <h2>13. Conclusões e Próximos Passos</h2>
+
+    <h3>13.1. Resultados alcançados</h3>
+    <ul>
+        <li>Comparação conceitual entre SQL e NoSQL e contextualização do uso de Cassandra.</li>
+        <li>Definição de perguntas de negócio alinhadas ao cenário de marketplace.</li>
+        <li>Planejamento e configuração de uma infraestrutura Cassandra em Docker com múltiplos nós.</li>
+        <li>Modelagem orientada a queries com tabelas de transações e agregados mensais.</li>
+        <li>Carga de dados e validação via CQL e Python.</li>
+        <li>Processo de extração, manipulação, criação de variáveis e exportação em CSV em Python.</li>
+        <li>Visualizações (linha, barras, dispersão) respondendo às principais perguntas de negócio.</li>
+    </ul>
+
+    <h3>13.2. Próximos passos sugeridos</h3>
+    <ul>
+        <li>Adicionar autenticação e controle de acesso ao cluster Cassandra.</li>
+        <li>Explorar topologias multi-datacenter para cenários de alta disponibilidade geográfica.</li>
+        <li>Criar novas tabelas derivadas ou materialized views para SLAs específicos de consulta.</li>
+        <li>Orquestrar o pipeline ETL com ferramentas como Apache Airflow ou Dagster.</li>
+        <li>Publicar dashboards em ferramentas de BI conectadas à base tratada.</li>
+    </ul>
+
+    <!-- 14. Repositório Git -->
+    <h2>14. Repositório Git do Projeto</h2>
+
+    <p>
+        Todo o código-fonte do projeto (scripts Python, arquivos Docker, dados de amostra e evidências gráficas)
+        está disponível no repositório:
+    </p>
+
+    <p>
+        <strong>Repositório Git:</strong>
+        <a href="https://github.com/CBarrosoBRRJ/PD-INFRAESTRUTURA-CASSANDRA-25E4_2" target="_blank">
+            https://github.com/CBarrosoBRRJ/PD-INFRAESTRUTURA-CASSANDRA-25E4_2
+        </a>
+    </p>
+
+    <div class="code-block">
+        <pre><code># Como clonar o repositório
+
+git clone https://github.com/CBarrosoBRRJ/PD-INFRAESTRUTURA-CASSANDRA-25E4_2.git
+cd PD-INFRAESTRUTURA-CASSANDRA-25E4_2</code></pre>
+    </div>
+
+    <p class="note">
+        O presente relatório em HTML pode ser aberto no navegador e exportado para PDF para entrega formal no ambiente da disciplina.
+    </p>
+
+</div>
+</body>
+</html>
